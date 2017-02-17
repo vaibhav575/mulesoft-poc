@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:jersey="http://www.mulesoft.org/schema/mule/jersey" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jersey http://www.mulesoft.org/schema/mule/jersey/current/mule-jersey.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8082"  doc:name="HTTP Listener Configuration"/>
+    <flow name="restImplFlow">
+       <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081" 
+                doc:name="HTTP"/>
+        <jersey:resources doc:name="REST">
+            <component class="restimpl.RestImpl"/>
+        </jersey:resources>
+    </flow>
+    <flow name="objectToJsonTransferFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/json" doc:name="HTTP"/>
+        <component class="restimpl.TestObjectComponent" doc:name="Java"/>
+        <json:object-to-json-transformer returnClass="java.lang.String" doc:name="Object to JSON"/>
+    </flow>
+    <flow name="jsonToObjectTransferFlow">
+        <file:inbound-endpoint path="/Users/vaibhav/Desktop/muletest" responseTimeout="10000" doc:name="File"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <file:file-to-string-transformer doc:name="File to String"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <json:json-to-object-transformer returnClass="restimpl.Employee" doc:name="JSON to Object"/>
+        <logger message="********Transformed java object from file************#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="jsonToObjectConsumesHttpRequest">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/toObject" doc:name="HTTP"/>
+        <json:json-to-object-transformer returnClass="restimpl.Employee" doc:name="JSON to Object"/>
+        <logger message="*****Transformed Java object ********: #[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
