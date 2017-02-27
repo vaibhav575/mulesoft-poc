@@ -23,7 +23,7 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
         <json:object-to-json-transformer returnClass="java.lang.String" doc:name="Object to JSON"/>
     </flow>
     <flow name="jsonToObjectTransferFlow">
-        <file:inbound-endpoint path="/Users/vaibhav/Desktop/muletest" responseTimeout="10000" doc:name="File"/>
+        <file:inbound-endpoint path="/Users/vaibhav.papat/Desktop/muletest" responseTimeout="10000" doc:name="File"/>
         <logger message="#[payload]" level="INFO" doc:name="Logger"/>
         <file:file-to-string-transformer doc:name="File to String"/>
         <logger message="#[payload]" level="INFO" doc:name="Logger"/>
@@ -32,7 +32,17 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
     </flow>
     <flow name="jsonToObjectConsumesHttpRequest">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/toObject" doc:name="HTTP"/>
-        <json:json-to-object-transformer returnClass="restimpl.Employee" doc:name="JSON to Object"/>
+        <json:json-to-object-transformer returnClass="java.util.HashMap" doc:name="JSON to Object"/>
+        <logger message="I am in 1 logger " level="INFO" doc:name="Logger"/>
+        <custom-filter class="validator.InputDataValidator" doc:name="Custom"/>
         <logger message="*****Transformed Java object ********: #[payload]" level="INFO" doc:name="Logger"/>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy when="#[exception.causedBy(java.lang.NullPointerException)]" doc:name="Catch Exception Strategy">
+                <set-payload value="Missing data :  #[payload]  Exception : #[exception.getCause()]" doc:name="Set Payload"/>
+            </catch-exception-strategy>
+            <catch-exception-strategy when="#[exception.causedBy(java.lang.IllegalArgumentException)]" doc:name="Catch Exception Strategy">
+                <set-payload value="Invalid Data #[payload]" doc:name="Set Payload"/>
+            </catch-exception-strategy>
+        </choice-exception-strategy>
     </flow>
 </mule>
