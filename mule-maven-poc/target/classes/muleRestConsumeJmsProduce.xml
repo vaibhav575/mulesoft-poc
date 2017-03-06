@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+    <http:request-config name="HTTP_Request_Configuration" host="localhost" port="8081" basePath="employee" doc:name="HTTP Request Configuration"/>
+    <flow name="muleRestConsumerFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/getDetails" doc:name="HTTP"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="employee/getDetails" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="name" value="#[message.inboundProperties.'http.query.params'.name]"/>
+
+            </http:request-builder>
+        </http:request>
+        <component class="com.learning.poc.processor.RestResponseProcessor" doc:name="Java"/>
+        <json:object-to-json-transformer returnClass="java.lang.String" doc:name="Object to JSON"/>
+        <jms:outbound-endpoint queue="StudioIN" connector-ref="Active_MQ" doc:name="JMS"/>
+    </flow>
+</mule>

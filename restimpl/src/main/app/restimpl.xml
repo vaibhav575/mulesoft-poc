@@ -37,11 +37,11 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
         <custom-filter class="validator.InputDataValidator" doc:name="Custom"/>
         <logger message="*****Transformed Java object ********: #[payload]" level="INFO" doc:name="Logger"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
-            <catch-exception-strategy when="#[exception.causedBy(java.lang.NullPointerException)]" doc:name="Catch Exception Strategy">
-                <set-payload value="Missing data :  #[payload]  Exception : #[exception.getCause()]" doc:name="Set Payload"/>
+            <catch-exception-strategy when="#[exception.causedBy(java.lang.NullPointerException)]" doc:name="NullPointer Strategy">
+                <set-payload value="Missing data :  #[payload]  Exception caused by: #[exception.getCause()]" doc:name="Set Payload"/>
             </catch-exception-strategy>
             <catch-exception-strategy when="#[exception.causedBy(java.lang.IllegalArgumentException)]" doc:name="Catch Exception Strategy">
-                <set-payload value="Invalid Data #[payload]" doc:name="Set Payload"/>
+                <set-payload value="Invalid Data #[payload]   Exception caused by: #[exception.getCause()]" doc:name="Set Payload"/>
             </catch-exception-strategy>
         </choice-exception-strategy>
     </flow>
